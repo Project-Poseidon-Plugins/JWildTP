@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldListener;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -42,7 +43,10 @@ public class JWildTP extends JavaPlugin {
         WorldListener worldListener = new WorldListener();
         Bukkit.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, worldListener, Event.Priority.Normal, plugin);
 
-        Bukkit.getServer().getPluginCommand("wild").setExecutor(new JWildTPCommand(plugin));
+        JWildTPCommand commandExecutor = new JWildTPCommand(plugin);
+        registerCommand("wild", commandExecutor);
+        registerCommand("rtp", commandExecutor);
+        registerCommand("randomtp", commandExecutor);
 
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
             Long currentUnix = System.currentTimeMillis() / 1000L;
@@ -72,6 +76,15 @@ public class JWildTP extends JavaPlugin {
 
     public HashMap<String, Long> getCoolDown() {
         return coolDown;
+    }
+
+    private void registerCommand(String commandName, JWildTPCommand executor) {
+        PluginCommand pluginCommand = Bukkit.getServer().getPluginCommand(commandName);
+        if (pluginCommand == null) {
+            logger(Level.SEVERE, "Failed to register command '/" + commandName + "': not found in plugin.yml");
+            return;
+        }
+        pluginCommand.setExecutor(executor);
     }
 
 
